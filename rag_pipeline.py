@@ -14,6 +14,11 @@ load_dotenv()
 
 llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash")
 
+INSUFFICIENT_INFORMATION_RESPONSE = (
+    "The uploaded research papers do not contain enough "
+    "information to answer this question."
+)
+
 
 def load_documents(documents_folder: str):
     """
@@ -81,6 +86,45 @@ def answer_query(vector_db: FAISS, query: str, k: int = 2) -> dict:
     for doc in documents:
         context += doc.page_content + "\n"
 
+    sufficiency_prompt = f"""
+You are a strict context sufficiency checker.
+
+Decide whether the provided context contains enough information
+to answer the question directly.
+
+Rules:
+- Use ONLY the provided context.
+- Do not use outside knowledge.
+- Do not infer facts that are not supported by the context.
+- If the context is unrelated, incomplete, or insufficient, answer NO.
+- Answer with exactly one word: YES or NO.
+
+Context:
+{context}
+
+Question:
+{query}
+"""
+
+    sufficiency_result = llm.invoke(sufficiency_prompt)
+    is_context_sufficient = sufficiency_result.content.strip().upper() == "YES"
+
+    citations = []
+
+    for doc in documents:
+        citations.append({
+            "source_file": doc.metadata.get("source"),
+            "page": doc.metadata.get("page"),
+            "chunk_id": doc.metadata.get("chunk_id"),
+            "snippet": doc.page_content[:200],
+        })
+
+    if not is_context_sufficient:
+        return {
+            "answer": INSUFFICIENT_INFORMATION_RESPONSE,
+            "citations": citations,
+        }
+
     prompt = f"""
 You are a Research Paper Analysis Assistant.
 
@@ -102,16 +146,6 @@ Question:
 """
 
     result = llm.invoke(prompt)
-
-    citations = []
-
-    for doc in documents:
-        citations.append({
-            "source_file": doc.metadata.get("source"),
-            "page": doc.metadata.get("page"),
-            "chunk_id": doc.metadata.get("chunk_id"),
-            "snippet": doc.page_content[:200],
-        })
 
     return {
         "answer": result.content,
