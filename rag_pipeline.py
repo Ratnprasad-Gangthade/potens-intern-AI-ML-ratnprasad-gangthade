@@ -49,6 +49,9 @@ def build_vector_db(documents_folder: str) -> FAISS:
 
     chunks = splitter.split_documents(docs)
 
+    for chunk_id, chunk in enumerate(chunks):
+        chunk.metadata["chunk_id"] = chunk_id
+
     embeddings = GoogleGenerativeAIEmbeddings(
         model="gemini-embedding-2-preview"
     )
@@ -63,9 +66,9 @@ def build_vector_db(documents_folder: str) -> FAISS:
     return vector_db
 
 
-def answer_query(vector_db: FAISS, query: str, k: int = 2) -> str:
+def answer_query(vector_db: FAISS, query: str, k: int = 2) -> dict:
     """
-    Retrieve relevant chunks and generate an answer.
+    Retrieve relevant chunks and generate an answer with citations.
     """
 
     documents = vector_db.similarity_search(
@@ -100,4 +103,17 @@ Question:
 
     result = llm.invoke(prompt)
 
-    return result.content
+    citations = []
+
+    for doc in documents:
+        citations.append({
+            "source_file": doc.metadata.get("source"),
+            "page": doc.metadata.get("page"),
+            "chunk_id": doc.metadata.get("chunk_id"),
+            "snippet": doc.page_content[:200],
+        })
+
+    return {
+        "answer": result.content,
+        "citations": citations,
+    }
