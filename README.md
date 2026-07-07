@@ -67,10 +67,12 @@ The pipeline follows a retrieval-first workflow:
 
 ### Chunking Strategy
 - Splitter: `RecursiveCharacterTextSplitter`
-- Chunk size: `1000`
+- Chunk size: `4000`
 - Chunk overlap: `200`
-- Each chunk receives a `chunk_id`.
-- Chunk metadata is reused for citations and document filtering.
+- Each chunk receives a unique `chunk_id`.
+- Chunk metadata is preserved for citations, document filtering, and contradiction analysis.
+
+Optimization: Increased chunk size from 2000 to 4000. Evaluation showed that larger chunks yield superior contextual retrieval for long-form research papers without exceeding the embedding model's constraints.
 
 ### Embedding Strategy
 - Embedding model: `gemini-embedding-2-preview`
@@ -183,3 +185,12 @@ print(comparison["explanation"])
 - Add focused tests for QA, citations, multilingual handling, and contradiction parsing.
 - Extract shared citation formatting into a small helper.
 - Improve validation and error messages for setup and runtime failures.
+
+## AI Use Log
+
+| AI Tool | Approximate Usage | Purpose |
+|---------|-------------------|---------|
+| OpenAI Codex | ~20–25 prompts | Feature integration, code refactoring, implementation improvements, and resolving integration issues. |
+| ChatGPT | ~40 messages | Prompt refinement, debugging, documentation, and implementation guidance. |
+
+ The project was initially developed by me as a single-PDF RAG chatbot. The research, RAG architecture, model selection, and overall system design were done independently. AI tools were used later to assist with integration, debugging, refactoring, and documentation. All suggestions were reviewed, modified where necessary, and tested before being included in the final project.
