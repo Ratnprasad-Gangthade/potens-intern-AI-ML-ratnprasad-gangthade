@@ -1,13 +1,16 @@
+import os
+
 from dotenv import load_dotenv
 
 load_dotenv()
+
+
 
 from langchain_community.vectorstores import FAISS
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 from rag_flow.document_loader import load_documents
-
 
 FAISS_INDEX_PATH = "faiss_index"
 EMBEDDING_MODEL = "gemini-embedding-2-preview"
@@ -22,7 +25,7 @@ def build_vector_db(documents_folder: str) -> FAISS:
     docs = load_documents(documents_folder)
 
     splitter = RecursiveCharacterTextSplitter(
-        chunk_size=1000,
+        chunk_size=4000,
         chunk_overlap=200
     )
 
