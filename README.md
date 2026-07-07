@@ -168,3 +168,21 @@ comparison = compare_documents(
 print(comparison["verdict"])
 print(comparison["explanation"])
 ```
+
+## Design Decisions
+- The pipeline is split into small modules for document loading, vector storage, QA, language handling, and contradiction analysis.
+- FAISS is used as a local vector store to keep retrieval simple and offline after indexing.
+- Gemini is reused for generation, translation, sufficiency checks, and comparison to avoid extra model dependencies.
+- `rag_pipeline.py` remains as a compatibility layer for existing imports.
+
+## Current Limitations / Unfinished Work
+- There is no helper yet for loading an already saved FAISS index from `faiss_index`.
+- Automated tests are not included.
+- Citation-building logic is repeated in QA and contradiction modules.
+- Error handling for missing environment variables, empty folders, and failed model calls is minimal.
+
+## Future Improvements
+- Add a FAISS index loading helper.
+- Add focused tests for QA, citations, multilingual handling, and contradiction parsing.
+- Extract shared citation formatting into a small helper.
+- Improve validation and error messages for setup and runtime failures.
