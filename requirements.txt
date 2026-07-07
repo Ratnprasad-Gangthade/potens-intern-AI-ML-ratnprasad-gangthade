@@ -3,7 +3,7 @@ langchain
 langchain-community
 langchain-google-genai
 langchain-text-splitters
-python-dotenv
+dotenv
 pypdf
 faiss-cpu
 langdetect

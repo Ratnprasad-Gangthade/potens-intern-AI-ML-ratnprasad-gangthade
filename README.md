@@ -27,7 +27,6 @@ The project supports grounded question answering, citations, hallucination preve
 |   |-- language_handling.py
 |   |-- qa_engine.py
 |   `-- vector_store.py
-|-- rag_pipeline.py
 |-- requirements.txt
 |-- .env
 `-- README.md
@@ -39,7 +38,6 @@ The project supports grounded question answering, citations, hallucination preve
 | `rag_flow/qa_engine.py` | QA, sufficiency checks, multilingual handling, and citations. |
 | `rag_flow/contradiction.py` | Document comparison and contradiction analysis. |
 | `rag_flow/language_handling.py` | Language detection and translation. |
-| `rag_pipeline.py` | Backward-compatible exports. |
 
 ## Tech Stack
 | Tool | Use |
@@ -146,19 +144,19 @@ Place PDF files inside `Documents/`.
 ## Usage
 Build the vector database:
 ```python
-from rag_pipeline import build_vector_db
+from rag_flow.vector_store import build_vector_db
 vector_db = build_vector_db("Documents")
 ```
 Ask a question:
 ```python
-from rag_pipeline import answer_query
+from rag_flow.qa_engine import answer_query
 response = answer_query(vector_db, "What method does the paper propose?")
 print(response["answer"])
 print(response["citations"])
 ```
 Compare two documents:
 ```python
-from rag_pipeline import compare_documents
+from rag_flow.contradiction import compare_documents
 comparison = compare_documents(
     vector_db,
     "Documents/paper_a.pdf",
@@ -173,7 +171,6 @@ print(comparison["explanation"])
 - The pipeline is split into small modules for document loading, vector storage, QA, language handling, and contradiction analysis.
 - FAISS is used as a local vector store to keep retrieval simple and offline after indexing.
 - Gemini is reused for generation, translation, sufficiency checks, and comparison to avoid extra model dependencies.
-- `rag_pipeline.py` remains as a compatibility layer for existing imports.
 
 ## Current Limitations / Unfinished Work
 - There is no helper yet for loading an already saved FAISS index from `faiss_index`.
