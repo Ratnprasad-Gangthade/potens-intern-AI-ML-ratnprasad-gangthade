@@ -16,7 +16,7 @@ INSUFFICIENT_INFORMATION_RESPONSE = (
 )
 
 
-def answer_query(vector_db: FAISS, query: str, k: int = 2) -> dict:
+def answer_query(vector_db: FAISS, query: str, k: int = 3) -> dict:
     """
     Retrieve relevant chunks and generate an answer with citations.
     """
@@ -36,17 +36,20 @@ def answer_query(vector_db: FAISS, query: str, k: int = 2) -> dict:
         context += doc.page_content + "\n"
 
     sufficiency_prompt = f"""
-You are a strict context sufficiency checker.
+You are a context sufficiency checker.
 
-Decide whether the provided context contains enough information
-to answer the question directly.
+Determine whether the provided context contains enough information
+to answer the user's question, even if the answer is only partial.
 
 Rules:
 - Use ONLY the provided context.
 - Do not use outside knowledge.
-- Do not infer facts that are not supported by the context.
-- If the context is unrelated, incomplete, or insufficient, answer NO.
-- Answer with exactly one word: YES or NO.
+- If the context contains relevant information that can reasonably answer the question, answer YES.
+- Answer NO only if the context contains no relevant information or is clearly insufficient to answer the question at all.
+- Respond with exactly one word:
+YES
+or
+NO.
 
 Context:
 {context}
@@ -89,10 +92,16 @@ Answer ONLY using the provided context.
 Rules:
 - Do not use outside knowledge.
 - Do not guess.
-- If the answer is not present in the retrieved context,
-  explicitly say:
-  "The uploaded research papers do not contain enough
-  information to answer this question."
+Use only the provided context.
+
+If the context partially answers the question,
+provide the partial answer and explicitly mention what information is missing.
+
+Only return:
+
+"The uploaded research papers do not contain enough information..."
+
+if none of the retrieved context is relevant.
 
 Context:
 {context}
